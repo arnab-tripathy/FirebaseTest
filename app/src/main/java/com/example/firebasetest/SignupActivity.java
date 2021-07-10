@@ -60,8 +60,15 @@ mAuth=FirebaseAuth.getInstance();
                                 public void onComplete(@NonNull  Task<AuthResult> task) {
                                     Log.d("TAG","oncomplete name"+mAuth.getUid());
                                     myRef=database.getReference().child(mAuth.getUid());
-                                    myRef.child("name").setValue(name);
-                                    startActivity(new Intent(SignupActivity.this,MainActivity.class));
+                                    myRef.child("name").setValue(name).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull  Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                                            }
+                                            }
+                                    });
+
 
                                 }
                             });

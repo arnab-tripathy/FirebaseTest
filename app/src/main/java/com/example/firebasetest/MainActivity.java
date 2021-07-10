@@ -38,20 +38,31 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
 // ...
 // Initialize Firebase Auth
-FirebaseDatabase database = FirebaseDatabase.getInstance();
+FirebaseDatabase database ;
+
+
+
+
+
     DatabaseReference myRef,myRef1;
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d("TAG","on started");
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         mAuth = FirebaseAuth.getInstance();
 
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if(currentUser != null){
+            if (database==null){
+                database=FirebaseDatabase.getInstance();
+                try {
+                    FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+                } catch (Exception e) {}
+            }
             myRef= database.getReference("Todos").child(mAuth.getUid());
             myRef1=database.getReference().child(mAuth.getUid()+"/name");
             myRef1.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -144,6 +155,7 @@ FirebaseDatabase database = FirebaseDatabase.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         mAuth = FirebaseAuth.getInstance();
         manager=new LinearLayoutManager(this);

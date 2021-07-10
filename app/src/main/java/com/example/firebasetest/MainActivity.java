@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -31,24 +32,41 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private EditText todotext;
     private Button todoadd;
+    private  TextView display;
     private LinearLayoutManager manager;
     String todoinput;
     RecyclerView recyclerView;
 // ...
 // Initialize Firebase Auth
 FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef;
+    DatabaseReference myRef,myRef1;
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d("TAG","on started");
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         mAuth = FirebaseAuth.getInstance();
+
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if(currentUser != null){
-            myRef= database.getReference("Todos").child(Objects.requireNonNull(mAuth.getUid()));
+            myRef= database.getReference("Todos").child(mAuth.getUid());
+            myRef1=database.getReference().child(mAuth.getUid()+"/name");
+            myRef1.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull  Task<DataSnapshot> task) {
+                    if (!task.isSuccessful()) {
+                        Log.e("firebase", "Error getting data", task.getException());
+                    }
+                    else {
+                        display.setText("Welcome"+String.valueOf(task.getResult().getValue()));
+                        Log.d("firebase", String.valueOf(task.getResult().getValue()));
+                    }
+                }
+            });
+
             Log.d("TAG","");
             FirebaseRecyclerOptions<MyModel> options=new FirebaseRecyclerOptions.Builder<MyModel>().setQuery(myRef, MyModel.class).build();
             Log.d("TAG","optionsss"+options.toString());
@@ -59,6 +77,7 @@ FirebaseDatabase database = FirebaseDatabase.getInstance();
                     Log.d("TAG","IN viewholder adater"+model.getTodo());
 
                     holder.setdata(model.getTodo());
+                    holder.complete.setVisibility(View.VISIBLE);
                     holder.delete.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -131,6 +150,7 @@ FirebaseDatabase database = FirebaseDatabase.getInstance();
         todotext=findViewById(R.id.todotext);
         todoadd=findViewById(R.id.todoadd);
         recyclerView=findViewById(R.id.recyclerview);
+        display=findViewById(R.id.displayname);
 
 
 
